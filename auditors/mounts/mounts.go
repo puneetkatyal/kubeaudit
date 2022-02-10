@@ -32,6 +32,7 @@ const (
 // SensitivePathMounts implements Auditable
 type SensitivePathMounts struct {
 	sensitivePaths map[string]bool
+	all            bool
 }
 
 func New(config Config) *SensitivePathMounts {
@@ -41,6 +42,7 @@ func New(config Config) *SensitivePathMounts {
 	}
 	return &SensitivePathMounts{
 		sensitivePaths: paths,
+		all:            config.All,
 	}
 }
 
@@ -53,7 +55,7 @@ func (sensitive *SensitivePathMounts) Audit(resource k8s.Resource, _ []k8s.Resou
 		return auditResults, nil
 	}
 
-	sensitiveVolumes := auditPodVolumes(spec, sensitive.sensitivePaths)
+	sensitiveVolumes := auditPodVolumes(spec, sensitive.sensitivePaths, sensitive.all)
 
 	if len(sensitiveVolumes) == 0 {
 		return auditResults, nil
@@ -71,7 +73,7 @@ func (sensitive *SensitivePathMounts) Audit(resource k8s.Resource, _ []k8s.Resou
 	return auditResults, nil
 }
 
-func auditPodVolumes(podSpec *k8s.PodSpecV1, sensitivePaths map[string]bool) map[string]v1.Volume {
+func auditPodVolumes(podSpec *k8s.PodSpecV1, sensitivePaths map[string]bool, all bool) map[string]v1.Volume {
 	if podSpec.Volumes == nil {
 		return nil
 	}
@@ -79,6 +81,11 @@ func auditPodVolumes(podSpec *k8s.PodSpecV1, sensitivePaths map[string]bool) map
 	found := make(map[string]v1.Volume)
 	for _, volume := range podSpec.Volumes {
 		if volume.HostPath == nil {
+			continue
+		}
+
+		if all {
+			found[volume.Name] = volume
 			continue
 		}
 

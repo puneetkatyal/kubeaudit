@@ -3,12 +3,16 @@ package commands
 import (
 	"bytes"
 	"fmt"
+	"strings"
+
 	"github.com/Shopify/kubeaudit/auditors/mounts"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
-const sensitivePathsFlagName = "denyPathsList"
+const (
+	sensitivePathsFlagName = "denyPathsList"
+	allHostPathsFlagName   = "allHostPaths"
+)
 
 var mountsConfig mounts.Config
 
@@ -36,6 +40,7 @@ func init() {
 func setPathsFlags(cmd *cobra.Command) {
 	cmd.Flags().StringSliceVarP(&mountsConfig.SensitivePaths, sensitivePathsFlagName, "d", mounts.DefaultSensitivePaths,
 		"List of sensitive paths that shouldn't be mounted")
+	cmd.Flags().BoolVarP(&mountsConfig.All, allHostPathsFlagName, "x", false, "Consider all host paths as sensitive")
 }
 
 func formatPathsList() string {

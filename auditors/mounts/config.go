@@ -2,6 +2,7 @@ package mounts
 
 type Config struct {
 	SensitivePaths []string `yaml:"denyPathsList"`
+	All            bool     `yaml:"allHostPaths"`
 }
 
 func (config *Config) GetSensitivePaths() []string {

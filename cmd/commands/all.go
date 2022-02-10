@@ -51,6 +51,10 @@ func setConfigFromFlags(cmd *cobra.Command, conf config.KubeauditConfig) config.
 		conf.AuditorConfig.Mounts.SensitivePaths = mountsConfig.SensitivePaths
 	}
 
+	if flagset.Changed(allHostPathsFlagName) {
+		conf.AuditorConfig.Mounts.All = mountsConfig.All
+	}
+
 	return conf
 }
 
